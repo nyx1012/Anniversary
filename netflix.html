@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Netflix | Our Story</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --netflix-red: #E50914;
+            --netflix-black: #141414;
+            --netflix-dark-grey: #181818;
+            --text-white: #ffffff;
+            --transition-speed: 0.8s;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        body {
+            background-color: var(--netflix-black);
+            color: var(--text-white);
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden; /* No scrolling */
+            user-select: none;
+        }
+
+        /* --- UTILITIES --- */
+        .scene {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            opacity: 0;
+            transition: opacity var(--transition-speed) ease-in-out;
+            z-index: 10;
+        }
+
+        .scene.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .btn {
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s, background 0.2s;
+        }
+
+        .btn:hover { transform: scale(1.05); }
+        .btn:active { transform: scale(0.95); }
+
+        /* --- SCENE 0: INTRO ANIMATION --- */
+        #scene-intro {
+            background-color: black;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .netflix-logo-anim {
+            color: var(--netflix-red);
+            font-size: 80px;
+            font-weight: 900;
+            letter-spacing: -5px;
+            animation: netflixScale 3s forwards;
+        }
+
+        @keyframes netflixScale {
+            0% { transform: scale(1); opacity: 0; }
+            20% { opacity: 1; }
+            80% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+
+        .skip-intro {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: rgba(0,0,0,0.5);
+            color: white;
+            border: 1px solid white;
+            padding: 5px 15px;
+            font-size: 14px;
+        }
+
+        /* --- SCENE 1: HOME SCREEN --- */
+        #scene-home {
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 0 5%;
+            background: linear-gradient(to right, rgba(0,0,0,0.8) 20%, transparent 60%),
+                        url('https://images.unsplash.com/photo-1518199266791-739949406b24?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80'); /* EDIT THIS: Main Background Image */
+            background-size: cover;
+            background-position: center;
+        }
+
+        .featured-content { max-width: 600px; }
+        .featured-title { font-size: 4rem; margin-bottom: 10px; font-weight: bold; }
+        .featured-meta { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; color: #46d369; font-weight: bold; }
+        .match { color: #46d369; }
+        .year { color: white; border: 1px solid rgba(255,255,255,0.4); padding: 0 5px; font-size: 0.8rem; }
+        .featured-desc { font-size: 1.2rem; line-height: 1.4; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); margin-bottom: 25px; }
+
+        .home-btns { display: flex; gap: 15px; }
+        .btn-play { background: white; color: black; padding: 12px 35px; font-size: 1.2rem; }
+        .btn-info { background: rgba(109, 109, 110, 0.7); color: white; padding: 12px 35px; font-size: 1.2rem; }
+
+        /* --- SCENE 2: EPISODES --- */
+        #scene-episodes {
+            background-color: var(--netflix-black);
+            padding: 5% 5%;
+            flex-direction: column;
+        }
+
+        .episodes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            width: 100%;
+            margin-top: 30px;
+        }
+
+        .episode-card {
+            background: var(--netflix-dark-grey);
+            border-radius: 4px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .episode-card:hover { transform: scale(1.05); z-index: 20; }
+        .episode-img { width: 100%; aspect-ratio: 16/9; background: #333; object-fit: cover; }
+        .episode-info { padding: 15px; }
+        .episode-number { color: #aaa; font-size: 0.9rem; margin-bottom: 5px; }
+        .episode-title { font-weight: bold; margin-bottom: 8px; }
+        .episode-synopsis { font-size: 0.85rem; color: #999; line-height: 1.4; }
+
+        /* --- SCENE 3: PLAYER --- */
+        #scene-player {
+            background: black;
+            flex-direction: column;
+        }
+
+        .player-header {
+            position: absolute;
+            top: 0;
+            width: 100%;
+            padding: 30px;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.7), transparent);
+            display: flex;
+            align-items: center;
+            z-index: 50;
+        }
+
+        .back-btn { font-size: 30px; margin-right: 20px; cursor: pointer; }
+        
+        .player-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .player-img {
+            max-width: 80%;
+            max-height: 60vh;
+            border-radius: 8px;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            margin-bottom: 30px;
+            animation: zoomIn 1s ease-out;
+        }
+
+        @keyframes zoomIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .player-text { text-align: center; max-width: 700px; }
+        .player-text h2 { font-size: 2.5rem; margin-bottom: 15px; color: var(--netflix-red); }
+        .player-text p { font-size: 1.2rem; line-height: 1.6; }
+
+        /* --- SCENE 4: LETTER --- */
+        #scene-letter {
+            background: black;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .letter-container {
+            max-width: 800px;
+            padding: 40px;
+            line-height: 1.8;
+            font-size: 1.2rem;
+            text-align: left;
+            border-left: 2px solid var(--netflix-red);
+            background: rgba(20,20,20,0.8);
+        }
+
+        .typewriter-text {
+            display: inline;
+            white-space: pre-wrap;
+        }
+
+        .loading-screen {
+            position: fixed;
+            top:0; left:0; width:100%; height:100%;
+            background: black;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            display: none;
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid rgba(255,255,255,0.1);
+            border-top: 5px solid var(--netflix-red);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* --- MOBILE RESPONSIVE --- */
+        @media (max-width: 768px) {
+            .featured-title { font-size: 2.5rem; }
+            .featured-desc { font-size: 1rem; }
+            .player-img { max-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Loading Spinner Overlay -->
+    <div class="loading-screen" id="netflix-loader">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Background Music (Optional) -->
+    <!-- EDIT THIS: Replace with your own MP3 link -->
+    <audio id="bgMusic" loop>
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- SCENE 0: INTRO ANIMATION -->
+    <section id="scene-intro" class="scene active">
+        <div class="netflix-logo-anim">NETFLIX</div>
+        <button class="btn skip-intro" onclick="startExperience()">Skip Intro</button>
+    </section>
+
+    <!-- SCENE 1: HOME SCREEN -->
+    <section id="scene-home" class="scene">
+        <div class="featured-content">
+            <h1 class="featured-title">Aleena & [Your Name]</h1> <!-- EDIT THIS: Your Name -->
+            <div class="featured-meta">
+                <span class="match">99% Match</span>
+                <span class="year">2024</span>
+                <span class="year">1 Season</span>
+                <span class="year">Ultra HD</span>
+            </div>
+            <p class="featured-desc">
+                An original story about two souls finding their way to each other. 
+                Experience the moments that built a bond that time can't break.
+            </p>
+            <div class="home-btns">
+                <button class="btn btn-play" onclick="goToEpisodes()">▶ Play</button>
+                <button class="btn btn-info" onclick="alert('A limited series created with love ❤️')">ⓘ More Info</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- SCENE 2: EPISODE SELECTION -->
+    <section id="scene-episodes" class="scene">
+        <h1 style="font-size: 2rem; margin-bottom: 10px;">Episodes</h1>
+        <h2 style="color: #aaa; font-size: 1.2rem;">Season 1</h2>
+        
+        <div class="episodes-grid">
+            <!-- Episode 1 -->
+            <div class="episode-card" onclick="playEpisode(1)">
+                <img src="https://images.unsplash.com/photo-1516589174184-c68526674fd6?auto=format&fit=crop&w=500" class="episode-img"> <!-- EDIT THIS: Image URL -->
+                <div class="episode-info">
+                    <div class="episode-number">1. How It Started</div>
+                    <div class="episode-title">The Spark</div>
+                    <div class="episode-synopsis">A deep dive into the initial messages and that undeniable curiosity.</div>
+                </div>
+            </div>
+
+            <!-- Episode 2 -->
+            <div class="episode-card" onclick="playEpisode(2)">
+                <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=500" class="episode-img"> <!-- EDIT THIS: Image URL -->
+                <div class="episode-info">
+                    <div class="episode-number">2. The First Call</div>
+                    <div class="episode-title">Late Night Voices</div>
+                    <div class="episode-synopsis">When hours felt like minutes and silence was never awkward.</div>
+                </div>
+            </div>
+
+            <!-- Episode 3 -->
+            <div class="episode-card" onclick="playEpisode(3)">
+                <img src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=500" class="episode-img"> <!-- EDIT THIS: Image URL -->
+                <div class="episode-info">
+                    <div class="episode-number">3. Making Me Smile</div>
+                    <div class="episode-title">Infinite Joy</div>
+                    <div class="episode-synopsis">Exploring the little things you do that make every day better.</div>
+                </div>
+            </div>
+
+            <!-- Final Episode -->
+            <div class="episode-card" onclick="playFinale()">
+                <div style="background: var(--netflix-red); aspect-ratio:16/9; display:flex; align-items:center; justify-content:center; font-size:40px;">❤️</div>
+                <div class="episode-info">
+                    <div class="episode-number">4. The Finale</div>
+                    <div class="episode-title">One More Thing</div>
+                    <div class="episode-synopsis">A special message reserved only for you. Don't skip the credits.</div>
+                </div>
+            </div>
+        </div>
+        <button class="btn btn-info" style="margin-top: 30px; width: 150px;" onclick="switchScene('scene-home')">Home</button>
+    </section>
+
+    <!-- SCENE 3: PLAYER SCREEN -->
+    <section id="scene-player" class="scene">
+        <div class="player-header">
+            <div class="back-btn" onclick="goToEpisodes()">←</div>
+            <div id="player-ep-title">Episode 1</div>
+        </div>
+        <div class="player-content">
+            <img src="" id="player-img" class="player-img">
+            <div class="player-text">
+                <h2 id="player-title">The Spark</h2>
+                <p id="player-caption">Episode Caption Here...</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SCENE 4: LOVE LETTER -->
+    <section id="scene-letter" class="scene">
+        <div class="letter-container">
+            <h1 style="color: var(--netflix-red); margin-bottom: 20px; font-size: 1.5rem;">Series Finale: A Letter to Aleena</h1>
+            <div id="letter-text" class="typewriter-text"></div>
+            <br><br>
+            <button class="btn btn-play" id="replay-btn" style="display:none; padding: 10px 20px;" onclick="location.reload()">Return to Menu</button>
+        </div>
+    </section>
+
+    <script>
+        /* --- DATA STORE (EDIT THIS) --- */
+        const episodeData = {
+            1: {
+                title: "The Spark",
+                caption: "I still look back at our first conversations and smile. Who knew that a simple 'hello' would lead to all of this? You caught my attention from day one, and you haven't let go since.",
+                img: "https://images.unsplash.com/photo-1516589174184-c68526674fd6?auto=format&fit=crop&w=1000"
+            },
+            2: {
+                title: "Late Night Voices",
+                caption: "Our first call was the moment I realized this was different. Hearing your voice made everything real. We talked until the sun came up, and I still didn't want to hang up.",
+                img: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1000"
+            },
+            3: {
+                title: "Infinite Joy",
+                caption: "It's the way you laugh at my dumb jokes, the way you support me, and the way you make even the most boring days feel like an adventure. You are my favorite person.",
+                img: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=1000"
+            }
+        };
+
+        const loveLetterContent = `Dearest Aleena,
+
+Like a great series, our story has had its beautiful moments, its cliffhangers, and its unforgettable scenes. But the best part is that our story isn't finished yet. 
+
+Every day with you feels like a new episode I can't wait to watch. You are my co-star, my best friend, and my greatest love. 
+
+Thank you for being part of this journey with me. I can't wait for Season 2, 3, and forever.
+
+Happy 1 Month Anniversary. ❤️`;
+
+        /* --- NAVIGATION LOGIC --- */
+
+        function switchScene(sceneId) {
+            document.querySelectorAll('.scene').forEach(s => {
+                s.classList.remove('active');
+                setTimeout(() => s.style.display = 'none', 800);
+            });
+            
+            const nextScene = document.getElementById(sceneId);
+            nextScene.style.display = 'flex';
+            setTimeout(() => nextScene.classList.add('active'), 50);
+        }
+
+        // Handle the Netflix Intro
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                if(document.getElementById('scene-intro').classList.contains('active')) {
+                    startExperience();
+                }
+            }, 3500);
+        });
+
+        function startExperience() {
+            switchScene('scene-home');
+            // Try to play music (might be blocked by browser until user clicks)
+            document.getElementById('bgMusic').play().catch(() => {});
+        }
+
+        function goToEpisodes() {
+            showLoader(() => {
+                switchScene('scene-episodes');
+            });
+        }
+
+        function playEpisode(num) {
+            const data = episodeData[num];
+            document.getElementById('player-ep-title').innerText = `Episode ${num}`;
+            document.getElementById('player-img').src = data.img;
+            document.getElementById('player-title').innerText = data.title;
+            document.getElementById('player-caption').innerText = data.caption;
+            
+            showLoader(() => {
+                switchScene('scene-player');
+            });
+        }
+
+        function playFinale() {
+            showLoader(() => {
+                switchScene('scene-letter');
+                typeWriter();
+            });
+        }
+
+        function showLoader(callback) {
+            const loader = document.getElementById('netflix-loader');
+            loader.style.display = 'flex';
+            setTimeout(() => {
+                loader.style.display = 'none';
+                callback();
+            }, 1200);
+        }
+
+        /* --- TYPEWRITER EFFECT --- */
+        let i = 0;
+        function typeWriter() {
+            if (i < loveLetterContent.length) {
+                document.getElementById("letter-text").innerHTML += loveLetterContent.charAt(i);
+                i++;
+                setTimeout(typeWriter, 50);
+            } else {
+                document.getElementById('replay-btn').style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>
