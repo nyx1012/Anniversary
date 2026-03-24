@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Wrapped ❤️</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --spotify-black: #121212;
+            --spotify-green: #1DB954;
+            --spotify-pink: #ff416c;
+            --spotify-purple: #8e2de2;
+            --spotify-white: #FFFFFF;
+            --transition-speed: 0.6s;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        body {
+            background-color: var(--spotify-black);
+            color: var(--spotify-white);
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Progress Bar Top Indicators */
+        .progress-container {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            display: flex;
+            gap: 5px;
+            z-index: 100;
+        }
+
+        .progress-bar {
+            height: 3px;
+            background: rgba(255, 255, 255, 0.3);
+            flex-grow: 1;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--spotify-white);
+            width: 0%;
+            transition: width 0.3s linear;
+        }
+
+        /* Scene Setup */
+        .scene {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            padding: 40px 20px;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .scene.active {
+            display: flex;
+            animation: slideIn 0.5s ease-out forwards;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Scene Specific Backgrounds */
+        #scene-intro { background: linear-gradient(180deg, #1DB954 0%, #121212 100%); }
+        #scene-stats { background: linear-gradient(180deg, #8e2de2 0%, #121212 100%); }
+        #scene-memory-select { background: #121212; }
+        #scene-memory-display { background: #000; }
+        #scene-letter { background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%); }
+
+        /* Typography */
+        h1 { font-size: 3rem; font-weight: 800; line-height: 1.1; margin-bottom: 20px; }
+        .stat-number { color: var(--spotify-green); font-size: 4rem; display: block; }
+        p { font-family: 'Roboto', sans-serif; font-size: 1.1rem; opacity: 0.9; }
+
+        /* Buttons */
+        .btn {
+            background: var(--spotify-white);
+            color: black;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 50px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            margin-top: 30px;
+            transition: transform 0.2s;
+        }
+
+        .btn:active { transform: scale(0.95); }
+
+        /* Memory List Styles */
+        .memory-list {
+            width: 100%;
+            max-width: 400px;
+            text-align: left;
+            margin-top: 20px;
+        }
+
+        .memory-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            background: rgba(255,255,255,0.05);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .memory-item:hover { background: rgba(255,255,255,0.15); }
+
+        .memory-rank { font-size: 1.5rem; margin-right: 20px; color: var(--spotify-green); width: 30px; }
+        .memory-info h3 { font-size: 1rem; }
+        .memory-info p { font-size: 0.8rem; }
+
+        /* Floating Hearts Effect */
+        .heart {
+            position: fixed;
+            pointer-events: none;
+            z-index: 99;
+            color: var(--spotify-green);
+            animation: floatAway 1s ease-out forwards;
+        }
+
+        @keyframes floatAway {
+            to { transform: translateY(-100px); opacity: 0; }
+        }
+
+        /* Letter Styling */
+        .letter-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 400px;
+            border: 1px solid rgba(255,255,255,0.2);
+            text-align: left;
+        }
+
+        .typewriter {
+            font-family: 'Roboto', sans-serif;
+            font-size: 1rem;
+            line-height: 1.6;
+            min-height: 200px;
+        }
+
+        /* Audio Control */
+        .music-btn {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid white;
+            color: white;
+            padding: 10px;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+        }
+
+        .img-container {
+            width: 100%;
+            aspect-ratio: 1/1;
+            background: #222;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .img-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="progress-container" id="progressBarContainer">
+        <div class="progress-bar"><div class="progress-fill" style="width: 100%"></div></div>
+        <div class="progress-bar"><div class="progress-fill"></div></div>
+        <div class="progress-bar"><div class="progress-fill"></div></div>
+        <div class="progress-bar"><div class="progress-fill"></div></div>
+    </div>
+
+    <!-- Background Music -->
+    <audio id="bgMusic" loop>
+        <!-- EDIT THIS: Add your Spotify-style MP3 link here -->
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3" type="audio/mpeg">
+    </audio>
+    <button class="music-btn" onclick="toggleMusic()" id="musicBtn">🎵</button>
+
+    <!-- SCENE 1: THE HOOK -->
+    <section id="scene-1" class="scene active">
+        <p style="text-transform: uppercase; letter-spacing: 2px;">2024 Wrapped</p>
+        <h1>You've been on my mind<br>all month.</h1>
+        <p>Ready to see your Month in Review?</p>
+        <button class="btn" onclick="goToScene(2)">Let's Go</button>
+    </section>
+
+    <!-- SCENE 2: THE STATS -->
+    <section id="scene-2" class="scene">
+        <h1>You spent</h1>
+        <span class="stat-number" id="minutes">43,200</span>
+        <h1>minutes</h1>
+        <p>making my life better since we met.</p>
+        <button class="btn" onclick="goToScene(3)">Next</button>
+    </section>
+
+    <!-- SCENE 3: TOP MEMORIES -->
+    <section id="scene-3" class="scene">
+        <h2 style="margin-bottom: 20px;">Your Top Moments</h2>
+        <div class="memory-list">
+            <!-- EDIT THIS: Change memory titles and dates -->
+            <div class="memory-item" onclick="openMemory('call')">
+                <div class="memory-rank">1</div>
+                <div class="memory-info">
+                    <h3>The First Phone Call</h3>
+                    <p>4 hours • Your Voice</p>
+                </div>
+            </div>
+            <div class="memory-item" onclick="openMemory('date')">
+                <div class="memory-rank">2</div>
+                <div class="memory-info">
+                    <h3>Our First Date</h3>
+                    <p>The night everything changed</p>
+                </div>
+            </div>
+            <div class="memory-item" onclick="openMemory('laugh')">
+                <div class="memory-rank">3</div>
+                <div class="memory-info">
+                    <h3>That One Inside Joke</h3>
+                    <p>I'm still laughing about it</p>
+                </div>
+            </div>
+        </div>
+        <button class="btn" style="background: var(--spotify-green); color: white;" onclick="goToScene(5)">One more thing...</button>
+    </section>
+
+    <!-- SCENE 4: MEMORY DETAIL (Story Style) -->
+    <section id="scene-4" class="scene">
+        <div class="img-container">
+            <img id="memory-img" src="" alt="Memory">
+        </div>
+        <h1 id="memory-title" style="font-size: 1.5rem;">Title</h1>
+        <p id="memory-desc">Description</p>
+        <button class="btn" onclick="goToScene(3)">Back to List</button>
+    </section>
+
+    <!-- SCENE 5: LOVE LETTER -->
+    <section id="scene-5" class="scene">
+        <p style="margin-bottom: 10px;">Top Listener Award</p>
+        <div class="letter-card">
+            <h2 style="color: var(--spotify-green); margin-bottom: 15px;">To My #1 Artist,</h2>
+            <div class="typewriter" id="typewriterText">
+                <!-- Letter will type out here -->
+            </div>
+        </div>
+        <button class="btn" onclick="location.reload()">Replay the Year ❤️</button>
+    </section>
+
+    <script>
+        /* --- CONFIGURATION --- */
+        const memoryData = {
+            'call': {
+                title: "The First Call",
+                desc: "I remember the exact moment I realized I didn't want to hang up. You were so easy to talk to.",
+                img: "https://images.unsplash.com/photo-1534536281715-e28d76689b4d?auto=format&fit=crop&w=500"
+            },
+            'date': {
+                title: "The First Date",
+                desc: "I was so nervous, but the moment I saw you walk in, everything else faded away.",
+                img: "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=500"
+            },
+            'laugh': {
+                title: "The Inside Joke",
+                desc: "If I ever look at my phone and smile, it's usually because I'm thinking of this moment.",
+                img: "https://images.unsplash.com/photo-1516627145497-ae6968895b74?auto=format&fit=crop&w=500"
+            }
+        };
+
+        const letterContent = "It’s been exactly one month, and honestly? You’ve topped all my charts. Thank you for being the best part of my day, every single day. I can't wait to see what our 'Wrapped' looks like next year. I love you! ❤️";
+
+        /* --- LOGIC --- */
+        let currentScene = 1;
+        const totalScenes = 5;
+
+        function updateProgress() {
+            const fills = document.querySelectorAll('.progress-fill');
+            fills.forEach((fill, index) => {
+                if (index < currentScene - 1) fill.style.width = '100%';
+                else if (index === currentScene - 1) fill.style.width = '100%';
+                else fill.style.width = '0%';
+            });
+        }
+
+        function goToScene(sceneNum) {
+            document.querySelectorAll('.scene').forEach(s => s.classList.remove('active'));
+            document.getElementById(`scene-${sceneNum}`).classList.add('active');
+            currentScene = sceneNum;
+            updateProgress();
+
+            if(sceneNum === 5) {
+                startTypewriter();
+            }
+        }
+
+        function openMemory(key) {
+            const data = memoryData[key];
+            document.getElementById('memory-img').src = data.img;
+            document.getElementById('memory-title').innerText = data.title;
+            document.getElementById('memory-desc').innerText = data.desc;
+            goToScene(4);
+        }
+
+        function startTypewriter() {
+            const container = document.getElementById('typewriterText');
+            container.innerHTML = '';
+            let i = 0;
+            function type() {
+                if (i < letterContent.length) {
+                    container.innerHTML += letterContent.charAt(i);
+                    i++;
+                    setTimeout(type, 40);
+                }
+            }
+            type();
+        }
+
+        // Floating Hearts on click
+        window.addEventListener('click', (e) => {
+            const heart = document.createElement('div');
+            heart.classList.add('heart');
+            heart.innerHTML = '💚';
+            heart.style.left = e.clientX + 'px';
+            heart.style.top = e.clientY + 'px';
+            document.body.appendChild(heart);
+            setTimeout(() => heart.remove(), 1000);
+        });
+
+        // Music Logic
+        const music = document.getElementById('bgMusic');
+        let playing = false;
+        function toggleMusic() {
+            const btn = document.getElementById('musicBtn');
+            if(playing) {
+                music.pause();
+                btn.innerText = '🔇';
+            } else {
+                music.play();
+                btn.innerText = '🎵';
+            }
+            playing = !playing;
+        }
+
+        // Initialize progress bar
+        updateProgress();
+    </script>
+</body>
+</html>
