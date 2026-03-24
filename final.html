@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ALEEFLIX | Aleena & Evin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --netflix-red: #e50914;
+            --netflix-black: #141414;
+            --netflix-dark-grey: #181818;
+            --text-white: #ffffff;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
+
+        body {
+            background-color: var(--netflix-black);
+            color: var(--text-white);
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* --- Scene Logic --- */
+        .scene {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1;
+        }
+        .scene.active { display: flex; animation: fadeIn 1s ease-in-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* --- Intro Animation --- */
+        #intro-scene { background: black; z-index: 100; }
+        .netflix-logo {
+            color: var(--netflix-red);
+            font-size: clamp(4rem, 15vw, 8rem);
+            font-weight: 900;
+            letter-spacing: -4px;
+            animation: netflixIntro 3.5s ease-in-out forwards;
+        }
+        @keyframes netflixIntro {
+            0% { transform: scale(0.6); opacity: 0; filter: blur(10px); }
+            40% { transform: scale(1); opacity: 1; filter: blur(0px); }
+            80% { transform: scale(1.1); opacity: 1; filter: blur(0px); }
+            100% { transform: scale(1.4); opacity: 0; filter: blur(20px); }
+        }
+
+        /* --- Home Screen --- */
+        #home-scene {
+            background-size: cover;
+            background-position: center;
+            align-items: flex-start;
+            padding-left: 6%;
+        }
+        .hero-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to right, rgba(0,0,0,0.9) 10%, transparent 60%, rgba(0,0,0,0.8) 100%);
+            z-index: -1;
+        }
+        .hero-title { font-size: clamp(3rem, 10vw, 5rem); margin-bottom: 10px; }
+        .hero-subtitle { font-size: 1.5rem; margin-bottom: 30px; font-weight: 300; color: #e5e5e5; }
+
+        /* --- Buttons --- */
+        .btn {
+            cursor: pointer; border: none; border-radius: 4px; padding: 12px 30px;
+            font-weight: bold; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; transition: 0.3s;
+        }
+        .btn-primary { background: white; color: black; }
+        .btn-secondary { background: rgba(109, 109, 110, 0.7); color: white; }
+        .btn:hover { transform: scale(1.05); filter: brightness(0.9); }
+
+        /* --- Episode Grid --- */
+        .episode-grid { display: grid; grid-template-columns: repeat(3, 280px); gap: 25px; padding: 20px; }
+        .episode-card { background: var(--netflix-dark-grey); border-radius: 4px; overflow: hidden; cursor: pointer; transition: 0.4s ease; }
+        .episode-card:hover { transform: scale(1.1); z-index: 10; box-shadow: 0 10px 20px rgba(0,0,0,0.6); }
+        .episode-card img { width: 100%; height: 150px; object-fit: cover; }
+        .episode-card-body { padding: 15px; }
+        .episode-card-body h4 { font-size: 0.85rem; }
+
+        /* --- Player (2 Pictures) --- */
+        .image-container { display: flex; gap: 20px; justify-content: center; margin: 20px 0; height: 45vh; width: 90%; }
+        .image-container img { width: 45%; height: 100%; object-fit: cover; border-radius: 8px; border: 1px solid #333; }
+
+        /* --- Distance Visualization --- */
+        .map-line { width: 70%; height: 2px; background: rgba(255,255,255,0.1); position: relative; margin: 60px auto; }
+        .map-progress { position: absolute; left: 0; top: 0; height: 100%; width: 0%; background: var(--netflix-red); box-shadow: 0 0 20px var(--netflix-red); }
+        .active .map-progress { animation: drawLine 4s 0.5s forwards ease-in-out; }
+        .dot { position: absolute; width: 16px; height: 16px; background: var(--netflix-red); border-radius: 50%; top: -7px; }
+        .city { position: absolute; top: 25px; font-size: 0.85rem; color: #aaa; white-space: nowrap; }
+        @keyframes drawLine { to { width: 100%; } }
+
+        /* --- Letter --- */
+        .letter-container { max-width: 700px; padding: 50px; background: rgba(255,255,255,0.05); border-radius: 10px; border-top: 4px solid var(--netflix-red); line-height: 1.8; font-size: 1.2rem; }
+
+        .back-btn { position: absolute; top: 40px; left: 40px; color: white; background: none; border: none; font-size: 1.5rem; cursor: pointer; z-index: 100; }
+        .music-toggle { position: fixed; bottom: 30px; left: 30px; z-index: 1000; background: rgba(0,0,0,0.5); border: 1px solid white; color: white; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <audio id="bgMusic" loop>
+        <source src="https://www.bensound.com/bensound-music/bensound-love.mp3" type="audio/mpeg">
+    </audio>
+
+    <button class="music-toggle" onclick="toggleMusic()"><i id="musicIcon" class="fas fa-volume-mute"></i></button>
+
+    <!-- Intro -->
+    <section id="intro-scene" class="scene active">
+        <h1 class="netflix-logo">ALEEFLIX</h1>
+    </section>
+
+    <!-- Home Screen -->
+    <section id="home-scene" class="scene">
+        <div class="hero-overlay"></div>
+        <div style="position: absolute; top: 30px; left: 6%; color: var(--netflix-red); font-size: 2rem; font-weight: 900;">ALEEFLIX</div>
+        <h1 class="hero-title" id="home-title"></h1>
+        <p class="hero-subtitle" id="home-subtitle"></p>
+        <div style="display: flex; gap: 15px;">
+            <button class="btn btn-primary" onclick="goToEpisodes()"><i class="fas fa-play"></i> Play</button>
+            <button class="btn btn-secondary" id="more-info-btn"><i class="fas fa-info-circle"></i> More Info</button>
+        </div>
+    </section>
+
+    <!-- Episode Grid -->
+    <section id="episode-scene" class="scene">
+        <button class="back-btn" onclick="showScene('home-scene')"><i class="fas fa-arrow-left"></i></button>
+        <h2 style="margin-bottom: 30px; font-size: 2rem;">Episodes | <span style="font-weight: 300; opacity: 0.6;">Season 1</span></h2>
+        <div class="episode-grid" id="episode-list"></div>
+    </section>
+
+    <!-- Playback Scene -->
+    <section id="player-scene" class="scene">
+        <button class="back-btn" onclick="showScene('episode-scene')"><i class="fas fa-arrow-left"></i></button>
+        
+        <div id="standard-player" style="text-align: center; width: 100%; display: flex; flex-direction: column; align-items: center;">
+            <h1 id="p-title"></h1>
+            <p id="p-desc" style="color: #aaa; margin: 10px 0 20px 0; max-width: 600px;"></p>
+            <div class="image-container">
+                <img id="img1" src="" alt="Photo 1">
+                <img id="img2" src="" alt="Photo 2">
+            </div>
+        </div>
+
+        <div id="distance-player" style="display: none; text-align: center; width: 100%;">
+            <h1>The Journey: 1,400 Miles</h1>
+            <div class="map-line">
+                <div class="map-progress"></div>
+                <div class="dot" style="left: 0;"><div class="city">Rosharon, TX</div></div>
+                <div class="dot" style="right: 0;"><div class="city" style="right:0">Ellicott City, MD</div></div>
+            </div>
+            <p style="color: #aaa; max-width: 600px; margin: 0 auto;" id="distance-text"></p>
+        </div>
+    </section>
+
+    <!-- Letter Scene -->
+    <section id="letter-scene" class="scene">
+        <div class="letter-container">
+            <h2 style="color: var(--netflix-red); margin-bottom: 20px;" id="letter-to"></h2>
+            <div id="typewriter"></div>
+            <p style="margin-top: 30px; text-align: right; font-weight: bold;" id="letter-from"></p>
+            <button class="btn btn-secondary" style="margin-top: 30px; width: 100%; justify-content: center;" onclick="location.reload()">Replay Story</button>
+        </div>
+    </section>
+
+    <script>
+        /* ======= SETTINGS / CHANGE EVERYTHING HERE ======= */
+
+        const CONFIG = {
+            homeTitle: "Aleena & Evin",
+            homeSubtitle: "The Greatest Match of the Season ❤️",
+            homeBackground: "https://images.unsplash.com/photo-1518621736915-f3b1c41bfd00?auto=format&fit=crop&w=1920", // YOUR HOME PIC
+            moreInfoAlert: "Started on Zoom. Matched on Hinge. 1,400 miles away. One soul.",
+            
+            letterTo: "To Aleena,",
+            letterFrom: "— Yours always, Evin ❤️",
+            letterText: "From that first Zoom class to our match on Hinge, every moment has been a blessing. 1,400 miles is a lot of ground to cover, but between Rosharon and Ellicott City, there isn't a single inch that doesn't hold a thought of you. You are the best thing that has happened to me, and I can't wait to write the rest of this story with you.",
+
+            episodes: [
+                {
+                    id: 1,
+                    title: "The Zoom Class",
+                    desc: "Where it all began. Just a few squares on a screen, and suddenly you were the only one I saw.",
+                    cardImg: "https://images.unsplash.com/photo-1588196749597-9ff075ee6b5b?auto=format&w=400", // Thumbnail
+                    img1: "https://images.unsplash.com/photo-1588196749597-9ff075ee6b5b?auto=format&w=800", // Full Pic 1
+                    img2: "https://images.unsplash.com/photo-1577891772247-36d586be5e66?auto=format&w=800"  // Full Pic 2
+                },
+                {
+                    id: 2,
+                    title: "The Hinge Match",
+                    desc: "The algorithm finally got it right. Matching with you was the best notification I've ever received.",
+                    cardImg: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&w=400",
+                    img1: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&w=800",
+                    img2: "https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&w=800"
+                },
+                {
+                    id: 3,
+                    title: "Our First Date",
+                    desc: "The day we turned screens into reality. I was nervous, but the moment I saw you, I knew.",
+                    cardImg: "https://images.unsplash.com/photo-1522673607200-1648832cee98?auto=format&w=400",
+                    img1: "https://images.unsplash.com/photo-1522673607200-1648832cee98?auto=format&w=800",
+                    img2: "https://images.unsplash.com/photo-1516589174184-c68526614af5?auto=format&w=800"
+                },
+                {
+                    id: 4,
+                    title: "Replay Moments",
+                    desc: "If I could pause time, I'd stay in these moments with you forever.",
+                    cardImg: "https://images.unsplash.com/photo-1494774157365-9e04c6720e47?auto=format&w=400",
+                    img1: "https://images.unsplash.com/photo-1494774157365-9e04c6720e47?auto=format&w=800",
+                    img2: "https://images.unsplash.com/photo-1501901664583-5bb4c57cde3c?auto=format&w=800"
+                },
+                {
+                    id: 5,
+                    title: "The Distance",
+                    isDistance: true,
+                    desc: "Distance means so little when someone means so much. No matter the miles, you're always home to me.",
+                    cardImg: "https://images.unsplash.com/photo-1436491865332-7a61a109c0f2?auto=format&w=400"
+                },
+                {
+                    id: 6,
+                    title: "One More Thing ❤️",
+                    isFinale: true,
+                    cardImg: "https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&w=400"
+                }
+            ]
+        };
+
+        /* ======= LOGIC (DON'T TOUCH UNLESS YOU'RE BRAVE) ======= */
+
+        // Initialize Home Screen
+        document.getElementById('home-scene').style.backgroundImage = `url('${CONFIG.homeBackground}')`;
+        document.getElementById('home-title').innerText = CONFIG.homeTitle;
+        document.getElementById('home-subtitle').innerText = CONFIG.homeSubtitle;
+        document.getElementById('more-info-btn').onclick = () => alert(CONFIG.moreInfoAlert);
+        document.getElementById('letter-to').innerText = CONFIG.letterTo;
+        document.getElementById('letter-from').innerText = CONFIG.letterFrom;
+
+        // Generate Episodes
+        const episodeList = document.getElementById('episode-list');
+        CONFIG.episodes.forEach(ep => {
+            const card = document.createElement('div');
+            card.className = 'episode-card';
+            card.onclick = () => {
+                if(ep.isFinale) startFinale();
+                else playEpisode(ep);
+            };
+            card.innerHTML = `
+                <img src="${ep.cardImg}">
+                <div class="episode-card-body">
+                    <h4 style="${ep.isFinale ? 'color:var(--netflix-red)' : ''}">${ep.title}</h4>
+                </div>
+            `;
+            episodeList.appendChild(card);
+        });
+
+        function showScene(id) {
+            document.querySelectorAll('.scene').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        function goToEpisodes() {
+            try { document.getElementById('bgMusic').play(); } catch(e){}
+            showScene('episode-scene');
+        }
+
+        function playEpisode(ep) {
+            const standard = document.getElementById('standard-player');
+            const distance = document.getElementById('distance-player');
+            if (ep.isDistance) {
+                standard.style.display = 'none';
+                distance.style.display = 'block';
+                document.getElementById('distance-text').innerText = ep.desc;
+            } else {
+                distance.style.display = 'none';
+                standard.style.display = 'flex';
+                document.getElementById('p-title').innerText = ep.title;
+                document.getElementById('p-desc').innerText = ep.desc;
+                document.getElementById('img1').src = ep.img1;
+                document.getElementById('img2').src = ep.img2;
+            }
+            showScene('player-scene');
+        }
+
+        function startFinale() {
+            showScene('letter-scene');
+            let i = 0;
+            const target = document.getElementById('typewriter');
+            target.innerHTML = "";
+            function type() {
+                if (i < CONFIG.letterText.length) {
+                    target.innerHTML += CONFIG.letterText.charAt(i);
+                    i++;
+                    setTimeout(type, 40);
+                }
+            }
+            type();
+        }
+
+        function toggleMusic() {
+            const m = document.getElementById('bgMusic');
+            const icon = document.getElementById('musicIcon');
+            if (m.paused) { m.play(); icon.className = "fas fa-volume-up"; }
+            else { m.pause(); icon.className = "fas fa-volume-mute"; }
+        }
+
+        window.onload = () => {
+            setTimeout(() => { showScene('home-scene'); }, 3800);
+        };
+    </script>
+</body>
+</html>
