@@ -83,7 +83,6 @@
         /* --- Portrait-Optimized Player --- */
         .player-container { width: 95%; max-width: 1200px; text-align: center; display: flex; flex-direction: column; align-items: center; }
         
-        /* Grid for 4 Portrait Images */
         .grid-4 {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -94,49 +93,24 @@
             margin-top: 15px;
         }
         .grid-4 img { 
-            width: 100%; 
-            height: 100%; 
-            object-fit: cover; 
-            border-radius: 6px; 
-            cursor: zoom-in;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-            transition: transform 0.3s ease;
+            width: 100%; height: 100%; object-fit: cover; border-radius: 6px; 
+            cursor: zoom-in; box-shadow: 0 5px 15px rgba(0,0,0,0.5); transition: transform 0.3s ease;
         }
         .grid-4 img:hover { transform: translateY(-5px); }
 
-        /* Style for 1 Portrait Image */
-        .single-img-wrapper {
-            position: relative;
-            margin-top: 15px;
-            display: inline-block;
-        }
+        .single-img-wrapper { position: relative; margin-top: 15px; display: inline-block; }
         .single-img {
-            max-height: 68vh; /* Optimized for iPhone portrait on a laptop screen */
-            width: auto;
-            border-radius: 8px;
-            box-shadow: 0 0 40px rgba(0,0,0,0.8);
-            cursor: zoom-in;
+            max-height: 68vh; width: auto; border-radius: 8px;
+            box-shadow: 0 0 40px rgba(0,0,0,0.8); cursor: zoom-in;
             border: 1px solid rgba(255,255,255,0.1);
         }
 
         /* --- Lightbox --- */
         #lightbox {
-            display: none;
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95);
-            z-index: 2000;
-            justify-content: center;
-            align-items: center;
-            cursor: zoom-out;
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95); z-index: 2000; justify-content: center; align-items: center; cursor: zoom-out;
         }
-        #lightbox img {
-            max-height: 95vh;
-            max-width: 95vw;
-            object-fit: contain;
-            animation: zoomEffect 0.3s ease;
-        }
+        #lightbox img { max-height: 95vh; max-width: 95vw; object-fit: contain; animation: zoomEffect 0.3s ease; }
         @keyframes zoomEffect { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
         /* --- Distance Visualization --- */
@@ -144,11 +118,36 @@
         .map-progress { position: absolute; left: 0; top: 0; height: 100%; width: 0%; background: var(--netflix-red); box-shadow: 0 0 20px var(--netflix-red); }
         .active .map-progress { animation: drawLine 4s 0.5s forwards ease-in-out; }
         .dot { position: absolute; width: 16px; height: 16px; background: var(--netflix-red); border-radius: 50%; top: -7px; }
-        .city { position: absolute; top: 25px; font-size: 0.85rem; color: #aaa; white-space: nowrap; }
+        .city { position: absolute; top: 25px; font-size: 0.7rem; color: #aaa; white-space: nowrap; max-width: 150px; overflow: hidden; text-overflow: ellipsis; }
         @keyframes drawLine { to { width: 100%; } }
 
-        /* --- Letter --- */
-        .letter-container { max-width: 700px; padding: 40px; background: rgba(255,255,255,0.05); border-radius: 10px; border-top: 4px solid var(--netflix-red); line-height: 1.8; font-size: 1.1rem; }
+        /* --- Letter Scene Upgrades --- */
+        .letter-container { 
+            width: 85%;
+            max-width: 900px; 
+            height: 80vh; /* Fixed height for long letters */
+            padding: 40px; 
+            background: rgba(255,255,255,0.03); 
+            border-radius: 10px; 
+            border-top: 4px solid var(--netflix-red); 
+            display: flex;
+            flex-direction: column;
+        }
+
+        #typewriter { 
+            flex-grow: 1;
+            overflow-y: auto; /* Allows internal scrolling for the long text */
+            padding-right: 15px;
+            line-height: 1.8; 
+            font-size: 1.05rem;
+            color: #eee;
+            text-align: left;
+        }
+
+        /* Netflix-style scrollbar */
+        #typewriter::-webkit-scrollbar { width: 4px; }
+        #typewriter::-webkit-scrollbar-track { background: #000; }
+        #typewriter::-webkit-scrollbar-thumb { background: var(--netflix-red); border-radius: 10px; }
 
         .back-btn { position: absolute; top: 40px; left: 40px; color: white; background: none; border: none; font-size: 1.5rem; cursor: pointer; z-index: 100; }
         .music-toggle { position: fixed; bottom: 30px; left: 30px; z-index: 1000; background: rgba(0,0,0,0.5); border: 1px solid white; color: white; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; }
@@ -196,11 +195,11 @@
         </div>
 
         <div id="distance-player" style="display: none; text-align: center; width: 100%;">
-            <h1>Miles between us: 1,446 Miles</h1>
+            <h1>Distance: 1,446 Miles</h1>
             <div class="map-line">
                 <div class="map-progress"></div>
-                <div class="dot" style="left: 0;"><div class="city">13106 Green Shores Ln, Rosharon, TX</div></div>
-                <div class="dot" style="right: 0;"><div class="city" style="right:0">3131 Normandy Woods Dr, Ellicott City, MD</div></div>
+                <div class="dot" style="left: 0;"><div class="city" style="left:0">Rosharon, TX</div></div>
+                <div class="dot" style="right: 0;"><div class="city" style="right:0">Ellicott City, MD</div></div>
             </div>
             <p style="color: #aaa; max-width: 600px; margin: 0 auto; font-size: 1.2rem;" id="distance-text"></p>
         </div>
@@ -208,10 +207,10 @@
 
     <section id="letter-scene" class="scene">
         <div class="letter-container">
-            <h2 style="color: var(--netflix-red); margin-bottom: 20px;" id="letter-to"></h2>
+            <h2 style="color: var(--netflix-red); margin-bottom: 15px;" id="letter-to"></h2>
             <div id="typewriter"></div>
-            <p style="margin-top: 30px; text-align: right; font-weight: bold;" id="letter-from"></p>
-            <button class="btn btn-secondary" style="margin-top: 30px; width: 100%; justify-content: center;" onclick="location.reload()">Replay Story</button>
+            <p style="margin-top: 20px; text-align: right; font-weight: bold;" id="letter-from"></p>
+            <button class="btn btn-secondary" style="margin-top: 20px; width: 100%; justify-content: center;" onclick="location.reload()">Replay Story</button>
         </div>
     </section>
 
@@ -222,56 +221,16 @@
             homeBackground: "https://i.ibb.co/rKLbXmD1/biscuit.jpg", 
             moreInfoAlert: "Season 1: The journey just started",
             letterTo: "To Aleena,",
-            letterFrom: "- Evin ️",
-            letterText: "Happy one-month anniversary, my love. I just wanted to say I love you so much. It's honestly crazy how slow/fast this month has gone by, and I wouldn't want to spend it with anybody else. Look how far we came. We started off staring at each other's foreheads in our MIS 4378 class and honestly, I thought you were the prettiest girl in class. I immediately wanted to get to know you but I just didn't know how to do it without coming off too strong. The few moments you showed your face in class, I would click on your camera and look at you here and there, because it was only a couple of times I got to see your face. The moment I found out you were graduating, I was like damn am I ever going to be able to shoot my shot? I always kept updated with whatever you were doing on LinkedIn and when I saw your LinkedIn post I knew I had to comment. I had to put myself in front of you to make sure you knew I was still here. One day I decided to get Hinge and explore the outside world for a little bit. I didn't know my entire world would be a girl I properly met on Hinge after crushing on her for a whole semester. I'm so glad I sent you a like because now I ended up liking you more and more every day after that. My love for you never stopped, and I genuinely wanted to get to know you as a person.  All of the nights that I've FaceTimed you, made me realize how much I like every part of you. Your personality, your humor, your constant love that you show me and everyone around you, your hobbies, your drive to be the best version of yourself. You are beautiful inside and out and I could not be any luckier. All of our dates, hangouts, our calls have proven to me that you are more than someone I just love. I'm in love with you. I feel at peace with you every time you are with me. You allow me to be the man that I want to be. You motivate me every single day. I don't take any of this for granted. I know it's been really hard being away from you for a month. It's like I just left as soon as we started this new journey but I hope you know that this will make us stronger and I am confident in us and what we have together. Anytime you need me, I'll be here. Let me be your rock. I can't wait to see you and finally give you the hug I've been waiting for. I can't wait to laugh with you and continue to grow what we have.  I know God has a great plan for us individually and together.  Aleena Prasad, I love you so much and happy one month my pretty girl.",
+            letterFrom: "- Evin ❤️",
+            letterText: "Happy one-month anniversary, my love. I just wanted to say I love you so much. It's honestly crazy how slow/fast this month has gone by, and I wouldn't want to spend it with anybody else. Look how far we came. We started off staring at each other's foreheads in our MIS 4378 class and honestly, I thought you were the prettiest girl in class. I immediately wanted to get to know you but I just didn't know how to do it without coming off too strong. The few moments you showed your face in class, I would click on your camera and look at you here and there, because it was only a couple of times I got to see your face. The moment I found out you were graduating, I was like damn am I ever going to be able to shoot my shot? I always kept updated with whatever you were doing on LinkedIn and when I saw your LinkedIn post I knew I had to comment. I had to put myself in front of you to make sure you knew I was still here. One day I decided to get Hinge and explore the outside world for a little bit. I didn't know my entire world would be a girl I properly met on Hinge after crushing on her for a whole semester. I'm so glad I sent you a like because now I ended up liking you more and more every day after that. My love for you never stopped, and I genuinely wanted to get to know you as a person. All of the nights that I've FaceTimed you, made me realize how much I like every part of you. Your personality, your humor, your constant love that you show me and everyone around you, your hobbies, your drive to be the best version of yourself. You are beautiful inside and out and I could not be any luckier. All of our dates, hangouts, our calls have proven to me that you are more than someone I just love. I'm in love with you. I feel at peace with you every time you are with me. You allow me to be the man that I want to be. You motivate me every single day. I don't take any of this for granted. I know it's been really hard being away from you for a month. It's like I just left as soon as we started this new journey but I hope you know that this will make us stronger and I am confident in us and what we have together. Anytime you need me, I'll be here. Let me be your rock. I can't wait to see you and finally give you the hug I've been waiting for. I can't wait to laugh with you and continue to grow what we have. I know God has a great plan for us individually and together. Aleena Prasad, I love you so much and happy one month my pretty girl.",
 
             episodes: [
-                {
-                    id: 1,
-                    title: "The Zoom Class",
-                    desc: "Where I had a little crush on you :)",
-                    cardImg: "https://st1.zoom.us/static/6.3.54678/image/thumb.png", 
-                    images: ["https://i.ibb.co/zhVLYFJV/zoom.jpg"] 
-                },
-                {
-                    id: 2,
-                    title: "The Hinge Match",
-                    desc: "Everything worked out for a reason.",
-                    cardImg: "https://1000logos.net/wp-content/uploads/2025/07/Hinge-logo.jpg",
-                    images: ["https://i.ibb.co/vCkNh7bc/hinge.jpg"]
-                },
-                {
-                    id: 3,
-                    title: "Our First Date",
-                    desc: "From FaceTime to Gyu-Kaku. I wish we could've gotten taken some pictures of our first date :(",
-                    cardImg: "https://assets.arlingtonmagazine.com/2024/05/20181107_gyu_kaku_028.jpg",
-                    images: ["https://i.ibb.co/LyMBZJ0/sad.jpg"]
-                },
-                {
-                    id: 4,
-                    title: "Replay Moments",
-                    desc: "Some pictures I always come back to you because you're pretty.",
-                    cardImg: "https://i.ibb.co/fYdwQh2J/capture2.jpg",
-                    images: [
-                        "https://i.ibb.co/mFXJH4MB/kiss.jpg",
-                        "https://i.ibb.co/V0MZBFVS/capture.jpg",
-                        "https://i.ibb.co/KpCZSSVv/capture4.jpg",
-                        "https://i.ibb.co/Kp3nvssK/capture5.jpg"
-                    ]
-                },
-                {
-                    id: 5,
-                    title: "The Distance",
-                    isDistance: true,
-                    desc: "How far I have to come to kiss you.",
-                    cardImg: "https://images.ctfassets.net/ov8o7v78mnye/5rU7YRT6ouJCisVHgGaPJQ/bc2b945c6a29fa4b324691d40a6efc6a/blog-flight-tracker1-Adobe_Stock_Artur_Grom.jpg"
-                },
-                {
-                    id: 6,
-                    title: "One More Thing ❤️",
-                    isFinale: true,
-                    cardImg: "https://i.ibb.co/pv8vSsWm/fore.jpg"
-                }
+                { id: 1, title: "The Zoom Class", desc: "Where I had a little crush on you :)", cardImg: "https://st1.zoom.us/static/6.3.54678/image/thumb.png", images: ["https://i.ibb.co/zhVLYFJV/zoom.jpg"] },
+                { id: 2, title: "The Hinge Match", desc: "Everything worked out for a reason.", cardImg: "https://1000logos.net/wp-content/uploads/2025/07/Hinge-logo.jpg", images: ["https://i.ibb.co/vCkNh7bc/hinge.jpg"] },
+                { id: 3, title: "Our First Date", desc: "From FaceTime to Gyu-Kaku. I wish we could've gotten some pictures of our first date :(", cardImg: "https://assets.arlingtonmagazine.com/2024/05/20181107_gyu_kaku_028.jpg", images: ["https://i.ibb.co/LyMBZJ0/sad.jpg"] },
+                { id: 4, title: "Replay Moments", desc: "Some pictures I always come back to because you're pretty.", cardImg: "https://i.ibb.co/fYdwQh2J/capture2.jpg", images: ["https://i.ibb.co/mFXJH4MB/kiss.jpg", "https://i.ibb.co/V0MZBFVS/capture.jpg", "https://i.ibb.co/KpCZSSVv/capture4.jpg", "https://i.ibb.co/Kp3nvssK/capture5.jpg"] },
+                { id: 5, title: "The Distance", isDistance: true, desc: "How far I have to come to kiss you.", cardImg: "https://images.ctfassets.net/ov8o7v78mnye/5rU7YRT6ouJCisVHgGaPJQ/bc2b945c6a29fa4b324691d40a6efc6a/blog-flight-tracker1-Adobe_Stock_Artur_Grom.jpg" },
+                { id: 6, title: "One More Thing ❤️", isFinale: true, cardImg: "https://i.ibb.co/pv8vSsWm/fore.jpg" }
             ]
         };
 
@@ -350,6 +309,8 @@
                 if (i < CONFIG.letterText.length) {
                     target.innerHTML += CONFIG.letterText.charAt(i);
                     i++;
+                    // Auto-scroll logic
+                    target.scrollTop = target.scrollHeight;
                     setTimeout(type, 35);
                 }
             }
